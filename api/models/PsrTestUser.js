@@ -1,5 +1,4 @@
 import mongoose from "mongoose";
-import bcrypt from "bcryptjs";
 
 const psrTestSchema = new mongoose.Schema(
   {
@@ -9,24 +8,17 @@ const psrTestSchema = new mongoose.Schema(
       unique: true,
       lowercase: true,
     },
-
     isPaid: { type: Boolean, default: false },
     paymentHistory: [
-    {
-      reference: String,
-      amount: Number,
-      status: { type: String, enum: ["pending", "failed", "success"] },
-      date: { type: Date, default: Date.now }
-    }
-  ],
+      {
+        reference: String,
+        amount: Number,
+        status: { type: String, enum: ["pending", "failed", "success"] },
+        date: { type: Date, default: Date.now },
+      },
+    ],
   },
   { timestamps: true }
 );
 
-const PsrTestUser = mongoose.model("PSRtest_User", psrTestSchema);
-export default PsrTestUser;
-
-
-
-
-
+export default psrTestSchema; // export schema only

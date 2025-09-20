@@ -1,12 +1,10 @@
 import crypto from "crypto";
-import PsrTestUser from "../models/PsrTestUser.js";
-import EduTestUser from "../models/EduTestUser.js";
 
 export const handlePaystackWebhook = async (req, res) => {
   try {
     // 1️⃣ Verify Paystack signature
     const paystackSignature = req.headers["x-paystack-signature"];
-    const rawBody = JSON.stringify(req.body); // Use raw body string
+    const rawBody = req.rawBody || JSON.stringify(req.body); // Use raw body stored in middleware
 
     const hash = crypto
       .createHmac("sha512", process.env.PAYMENT_API_SECRET_KEY)
@@ -30,11 +28,13 @@ export const handlePaystackWebhook = async (req, res) => {
 
     if (!appName || !userId) return res.sendStatus(400);
 
+    // 3️⃣ Pick the correct model from request
     let UserModel;
-    if (appName === "psrtest") UserModel = PsrTestUser;
-    else if (appName === "edutest") UserModel = EduTestUser;
+    if (appName === "psrtest") UserModel = req.PsrTestUser;
+    else if (appName === "edutest") UserModel = req.EduTestUser;
     else return res.sendStatus(400);
 
+    // 4️⃣ Update user payment info
     const user = await UserModel.findById(userId);
     if (!user) return res.sendStatus(404);
 
@@ -55,7 +55,6 @@ export const handlePaystackWebhook = async (req, res) => {
 
     console.log(`[Webhook] Verified & updated payment for ${appName}: ${reference}`);
     res.sendStatus(200);
-
   } catch (err) {
     console.error("Webhook DB update error:", err.message);
     res.sendStatus(500);
