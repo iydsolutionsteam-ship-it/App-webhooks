@@ -10,9 +10,6 @@ dotenv.config();
 
 const app = express();
 
-const psrDb = connectDB("PSR Test", process.env.PSRTEST_MONGO_URI);
-const edutestDb = connectDB("Edu Test", process.env.EDUTEST_MONGO_URI);
-
 app.use(requestId());
 
 // Middleware to parse JSON and keep raw body for signature verification
@@ -44,8 +41,27 @@ app.use("/api/paystack/webhooks", requestLogger, handlePaystackWebhook);
 app.use(notFound);
 app.use(errorHandler);
 
-// Server start
-const PORT = process.env.PORT || 5002;
-app.listen(PORT, () =>
-  console.log(`Server running on http://localhost:${PORT}`)
-);
+// Start server after DB connections are ready
+const startServer = async () => {
+  try {
+    // Connect to databases
+    const psrDb = connectDB("PSR Test", process.env.PSRTEST_MONGO_URI);
+    const edutestDb = connectDB("Edu Test", process.env.EDUTEST_MONGO_URI);
+
+    // Wait for connections to be fully established
+    await psrDb.asPromise();
+    await edutestDb.asPromise();
+
+    console.log("✅ Both databases connected successfully.");
+
+    const PORT = process.env.PORT || 5002;
+    app.listen(PORT, () =>
+      console.log(`Server running on http://localhost:${PORT}`)
+    );
+  } catch (err) {
+    console.error("❌ Failed to connect to databases:", err.message);
+    process.exit(1);
+  }
+};
+
+startServer();
