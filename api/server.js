@@ -38,7 +38,7 @@ app.get("/ping", (req, res) => {
 });
 
 // Webhook route
-app.use("/api/webhooks", requestLogger, handlePaystackWebhook);
+app.use("/api/paystack/webhooks", requestLogger, handlePaystackWebhook);
 
 // Error handling middleware
 app.use(notFound);
