@@ -47,7 +47,7 @@ const startServer = async () => {
     await eduDb.asPromise();
 
     // Bind models to connections
-    PsrTestUser = psrDb.model("PsrTest_User", psrTestSchema);
+    PsrTestUser = psrDb.model("PSRtest_User", psrTestSchema);
     EduTestUser = eduDb.model("Edutest_User", eduTestSchema);
 
     console.log("✅ Both databases connected successfully.");
